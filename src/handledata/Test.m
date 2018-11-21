@@ -7,10 +7,10 @@ load(cacheDataPath);
 %%
 check_axis = 'z';
 check_id = 33;
-win_size = 20;
+win_size = 40;
 
 %actstr = 'Walking';
-actstr = 'Upstairs';
+actstr = 'Sitting';
 actlabels = getActivityNames();
 check_acti = find(strcmp(actlabels, actstr));
 %% Read data
@@ -47,15 +47,15 @@ addActivityLegend( check_acti);
 win_size = 20;
 cumsum = [0];
 filted_data = [];
-counts = [1];
+counts = [0];
 
 sel = (id_data == check_id) & (acti_label == check_acti);
 check_data = axis_data(sel);
 
 t_mean = mean(check_data);
 t_std = std(check_data);
-up_limit = t_mean + t_std;
-down_limit = t_mean - t_std;
+up_limit = t_mean + 2*t_std;
+down_limit = t_mean - 2*t_std;
 
 %j = 2;
 for i = 2 : length(check_data)
@@ -185,3 +185,4 @@ output_data = [output_raw_data, output_filted_data, output_raw_label ];
     end
 %}
 %csvwrite(output_file_name, output_data);
+%%

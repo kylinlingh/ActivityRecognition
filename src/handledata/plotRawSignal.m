@@ -69,4 +69,5 @@ end
 
 % To minimize visual clutter, only add legend to last plot
 addActivityLegend(acts)
+
 end

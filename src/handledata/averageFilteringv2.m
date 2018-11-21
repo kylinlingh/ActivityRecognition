@@ -1,4 +1,4 @@
-function [output_raw_data, output_filted_data] = averageFilteringv2(cachedData,check_axis, check_id, win_size, output_file_name)
+function [output_raw_data, output_filted_data, output_raw_label,min_acti_length] = averageFilteringv2(cachedData,check_axis, check_id, win_size, output_file_name)
 %check_axis = 'z';
 %check_id = 33;
 %check_acti = 2;
@@ -25,20 +25,26 @@ output_filted_data = [];
 cur_raw_data = [];
 cur_raw_label = [];
 
+min_acti_length = inf;
+cur_acti_length = 0;
 for da_index = 1 : length(check_axis)
     cur_label = check_label(da_index);
     if cur_label == pre_label
+       cur_acti_length = cur_acti_length + 1;
        cur_raw_data = [cur_raw_data; check_axis(da_index)];
        cur_raw_label = [cur_raw_label; check_label(da_index)];
     else
+        if min_acti_length > cur_acti_length
+            min_acti_length = cur_acti_length;
+        end
         cumsum = [0];
         counts = [0];
         filted_data = [];
        % belief_min, belief_max = calculateBeliefArea(cur_raw_data);
         t_mean = mean(cur_raw_data);
         t_std = 0.5 * std(cur_raw_data);
-        up_limit = t_mean + t_std;
-        down_limit = t_mean - t_std;
+        up_limit = t_mean + 2*t_std;
+        down_limit = t_mean - 2*t_std;
              
         for i = 2 : length(cur_raw_data) + 1
             cur_num = cur_raw_data(i - 1);
@@ -65,6 +71,7 @@ for da_index = 1 : length(check_axis)
         cur_raw_data = [];
         cur_raw_label = [];
         pre_label = cur_label;
+        cur_acti_length = 0;
     end
 end
 fprintf('Length of output_raw_data: %d\n', length(output_raw_data));
