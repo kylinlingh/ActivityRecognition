@@ -59,6 +59,6 @@ mutationDetection(half_win, sec_filtered_axis_x, sec_filtered_axis_y, sec_filter
 
 %% Plot raw signal
 fs = 20;
-plotRawSignal(fs, raw_label, raw_axis_x, target_id, 'x');
-plotRawSignal(fs, raw_label, raw_axis_y, target_id, 'y');
-plotRawSignal(fs, raw_label, raw_axis_z, target_id, 'z');
+plotRawSignal(fs, raw_label, raw_axis_x, target_id);
+plotRawSignal(fs, raw_label, raw_axis_y, target_id);
+plotRawSignal(fs, raw_label, raw_axis_z, tar);

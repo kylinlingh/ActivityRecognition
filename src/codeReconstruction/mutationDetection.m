@@ -4,24 +4,24 @@ diff_array_x = computeDifferenceValue(filtered_x, half_win);
 diff_array_y = computeDifferenceValue(filtered_y, half_win);
 diff_array_z = computeDifferenceValue(filtered_z, half_win);
 
-%{
+
     figure;
     subplot(311);
     findpeaks(diff_array_x, 'MinPeakHeight', 0.5, 'MinPeakDistance', 100);
     hold on;
     plot(raw_label, 'g-','LineWidth',1.5);
-    title('Peaks of filted_x');
+    title('Peaks of filted X');
     subplot(312); 
     findpeaks(diff_array_y, 'MinPeakHeight', 0.5, 'MinPeakDistance', 100);
     hold on;
     plot(raw_label, 'g-','LineWidth',1.5);
-    title('Peaks of filted_y');
+    title('Peaks of filted Y');
     subplot(313);
     findpeaks(diff_array_z, 'MinPeakHeight', 0.5, 'MinPeakDistance', 100);
     hold on;
     plot(raw_label, 'g-','LineWidth',1.5);
-    title('Peaks of filted_z');
-%}
+    title('Peaks of filted Z');
+
 
 [~, locs_x, ~, ~] = findpeaks(diff_array_x, 'MinPeakHeight', 0.5, 'MinPeakDistance', 100);
 [~, locs_y, ~, ~] = findpeaks(diff_array_y, 'MinPeakHeight', 0.5, 'MinPeakDistance', 100);
