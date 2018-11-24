@@ -9,7 +9,7 @@ clearvars -except cachedData
 %% Double average filtering
 win_size = 21;
 std_coeff = 1;
-target_id = 6;
+target_id = 8;
 
 % Attention: must remove these ids' data: 4,9£¬25
 [raw_axis_x, raw_label] = extractIndividualData(cachedData, 'x', target_id);
@@ -55,10 +55,19 @@ hold off;
 
 % function mutationDetection(half_win, filtered_x, filtered_y, filtered_z, raw_label)
 half_win = 10;
-mutationDetection(half_win, sec_filtered_axis_x, sec_filtered_axis_y, sec_filtered_axis_z, raw_label, target_id);
+[pred_pos, real_pos] = mutationDetection(half_win, sec_filtered_axis_x, sec_filtered_axis_y, sec_filtered_axis_z, raw_label, target_id);
 
+
+
+
+
+
+%{
 %% Plot raw signal
 fs = 20;
 plotRawSignal(fs, raw_label, raw_axis_x, target_id, 'x');
 plotRawSignal(fs, raw_label, raw_axis_y, target_id, 'y');
 plotRawSignal(fs, raw_label, raw_axis_z, target_id, 'z');
+%}
+
+

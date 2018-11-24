@@ -1,4 +1,4 @@
-function mutationDetection(half_win, filtered_x, filtered_y, filtered_z, raw_label, target_id)
+function [predict_locs, real_mutation_pos] =  mutationDetection(half_win, filtered_x, filtered_y, filtered_z, raw_label, target_id)
 
 diff_array_x = computeDifferenceValue(filtered_x, half_win);
 diff_array_y = computeDifferenceValue(filtered_y, half_win);
@@ -21,13 +21,14 @@ diff_array_z = computeDifferenceValue(filtered_z, half_win);
     hold on;
     plot(raw_label, 'g-','LineWidth',1.5);
     title('Peaks of filted Z');
-
+%}
 
 [~, locs_x, ~, ~] = findpeaks(diff_array_x, 'MinPeakHeight', 0.5, 'MinPeakDistance', 100);
 [~, locs_y, ~, ~] = findpeaks(diff_array_y, 'MinPeakHeight', 0.5, 'MinPeakDistance', 100);
 [~, locs_z, ~, ~] = findpeaks(diff_array_z, 'MinPeakHeight', 0.5, 'MinPeakDistance', 100);
 
 predict_locs = getPredictedPosition(locs_x, locs_y, locs_z);
+real_mutation_pos = findRealMutationPosition(raw_label);
 drawPredictedLabel(raw_label, predict_locs, target_id);
 
 
@@ -92,7 +93,7 @@ drawPredictedLabel(raw_label, predict_locs, target_id);
             end
     end
 
-    function [true_labels] = findTrueMutationPosition(raw_labels)
+    function [real_mutation_pos] = findRealMutationPosition(raw_labels)
         t_array = zeros(length(raw_labels),1);
         k = 1;
         for i = 2 : length(raw_labels)
@@ -101,7 +102,7 @@ drawPredictedLabel(raw_label, predict_locs, target_id);
                k = k + 1;
             end
         end
-        true_labels = t_array(1:k-1);
+        real_mutation_pos = t_array(1:k-1);
     end
 
 end
