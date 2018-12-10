@@ -7,6 +7,7 @@ function filtered_axis = averageFiltering(input_axis, input_label, win_size, coe
     forward_pointer = 1;
     t_label_count = 0;
     
+    % gather data having same label
     for i = 1 : in_arr_len
         cur_label = input_label(i);
         if cur_label ~= pre_label
