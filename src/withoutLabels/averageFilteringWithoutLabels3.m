@@ -1,18 +1,27 @@
-function [remain_data, candidate_pos] = averageFilteringWithoutLabels3(raw_label, raw_axis, win_len, target_id)
+function [remain_data, candidate_pos] = averageFilteringWithoutLabels3(raw_label, raw_axis, win_len, target_id, target_axis, pre_threshold, bak_threshold, check_win)
     
-    check_win = 3;
+    %check_win = 3; % WISDM
+    %check_win = 1;
     validated_threshold = 0.1;
-    [for_diff, bak_diff, bi_diff, candidate_pos, remain_data] = calDifference(raw_axis, 100, validated_threshold, check_win);
+    %%pre_threshold = 3;
+    %%bak_threshold = 1;
+    
+ %   pre_threshold = 9;
+ %   bak_threshold = 1;
+    
+    [for_diff, bak_diff, bi_diff, candidate_pos, remain_data] = calDifference(raw_axis, pre_threshold, bak_threshold, 100, validated_threshold, check_win);
     mergeThreshold = 200;
     if ~isempty(candidate_pos)
-        candidate_pos = mergeCandidatePos(candidate_pos, mergeThreshold);
+            candidate_pos = mergeCandidatePos(candidate_pos, mergeThreshold);
     end
-%    drawPlot(for_diff, bak_diff, bi_diff, raw_label);
-%    drawPredictedLabel(raw_label, candidate_pos, target_id);
-%    drawFiltedSignal(raw_axis, remain_data, raw_label);
+    
+%    drawDifferencePlot(raw_label, raw_axis, for_diff, bak_diff, pre_threshold, bak_threshold, candidate_pos, target_id, target_axis);
+%    drawPlot(for_diff, bak_diff, bi_diff, raw_label, target_id, target_axis);
+%    drawPredictedLabel(raw_label, candidate_pos, target_id, target_axis);
+%    drawFiltedSignal(raw_axis, remain_data, raw_label, target_id, target_axis);
     
     
-    function [for_diff, bak_diff, bi_diff, candidate_pos, remain_data] = calDifference(axis_data, coeff, threshold,check_win)
+    function [for_diff, bak_diff, bi_diff, candidate_pos, remain_data] = calDifference(axis_data, pre_threshold, bak_threshold, coeff, threshold,check_win)
         data_len = length(axis_data);
         for_diff = zeros(data_len, 1);
         bak_diff = zeros(data_len, 1);
@@ -23,11 +32,10 @@ function [remain_data, candidate_pos] = averageFilteringWithoutLabels3(raw_label
         remain_data = zeros(data_len, 1);
         r = 1;
  %       threshold = 5;
-        pre_threshold = 3;
-        bak_threshold = 1;
+
  
         for i = 2 : data_len - 1 - check_win
-            cur_data = axis_data(i);
+          %  cur_data = axis_data(i);
             [for_beg_pointer,bak_end_pointer] = calPointer(i, win_len, data_len, check_win);
             for_end_pointer = i - 1;
             %bak_beg_pointer = i + 1;
@@ -101,35 +109,40 @@ function [remain_data, candidate_pos] = averageFilteringWithoutLabels3(raw_label
         end
     end
 
-    function drawPlot(for_diff, bak_diff, bi_diff, raw_label)
+    function drawPlot(for_diff, bak_diff, bi_diff, raw_label, target_id, target_axis)
         figure;
         subplot(411);
         plot(raw_axis);
         hold on;
         plot(raw_label);
-        title("Raw signal");
+        t_title = [ 'Raw signal of target id: ', num2str(target_id), ' At target axis: ', target_axis];
+        title(t_title);
           
         subplot(412);
         plot(for_diff);
         hold on;
         plot(raw_label);
-        title("Forward difference");
+        t_title = [ 'Forward difference of target id: ', num2str(target_id), ' At target axis: ', target_axis];
+        title(t_title);
         
         subplot(413);
         plot(bak_diff);
         hold on;
         plot(raw_label);
-        title("Backward difference");
+        t_title = [ 'Backward difference of target id: ', num2str(target_id), ' At target axis: ', target_axis];
+        title(t_title);
         
         subplot(414);
         plot(bi_diff);
         hold on;
         plot(raw_label);
-        title("Bidrection difference");
+        t_title = [ 'Bidirection difference of target id: ', num2str(target_id), ' At target axis: ', target_axis];
+        title(t_title);
         hold off;
     end
 
-    function drawPredictedLabel(raw_label, predict_loc, target_id)
+%{
+    function drawPredictedLabel(raw_label, predict_loc, target_id, target_axis)
         figure;
         plot(raw_label, 'g-', 'LineWidth', 1);
         hold on;
@@ -137,20 +150,61 @@ function [remain_data, candidate_pos] = averageFilteringWithoutLabels3(raw_label
            plot([predict_loc(i), predict_loc(i)],[0, 7], 'r-','LineWidth',1);
            hold on;
         end
-        t_title = [ 'Predicted labels compared to raw label of target id: ', num2str(target_id)];
+        t_title = [ 'Predicted labels compared to raw label of target id: ', num2str(target_id), ' At target axis: ', target_axis];
         title(t_title);
         legend('raw_label', 'predicted position');
         hold off;
     end
-
-    function drawFiltedSignal(raw_data, filted_data, raw_label)
+%}
+    function drawFiltedSignal(raw_data, filted_data, raw_label, target_id, target_axis)
        figure;
        plot(raw_data, 'b-');
        hold on;
        plot(filted_data, 'g-');
        hold on;
        plot(raw_label, 'r-');
-       title('Raw signal and filted signal comparation');
+       t_title = [ 'Raw signal and filtered signal of target id: ', num2str(target_id), ' At target axis: ', target_axis];
+        title(t_title);
+    end
+
+    function drawDifferencePlot(raw_label, raw_data, for_diff, bak_diff, for_threshold, bak_threshold, predict_loc, target_id, target_axis)
+        figure;
+        subplot(211);
+        plot(raw_data, 'b-');
+        
+        hold on;
+  %      plot(for_diff, 'c- ', 'LineWidth', 1);
+  %      hold on;
+        plot([0, length(raw_data)],[for_threshold,for_threshold], 'r-.', 'LineWidth', 1.5);
+        for i = 1 : length(predict_loc)
+           plot([predict_loc(i), predict_loc(i)],[0, 7], 'g--','LineWidth',1);
+           hold on;
+        end
+        hold on;
+        plot(raw_label, 'k-', 'LineWidth', 1.5);
+        t_title = ['Difference value of target id: ', num2str(target_id), ' At target axis: ', target_axis];
+        title(t_title);
+%        legend('raw signal', 'for diff', 'for threshold');
+        hold off;
+
+        
+        subplot(212);
+        plot(raw_data, 'b-');
+        
+        hold on;
+    %    plot(bak_diff, 'c-' ,'LineWidth', 1);
+    %    hold on;
+        plot([0, length(raw_data)],[bak_threshold,bak_threshold], 'r-.', 'LineWidth', 1.5);
+        for i = 1 : length(predict_loc)
+           plot([predict_loc(i), predict_loc(i)],[0, 7], 'g--','LineWidth',1);
+           hold on;
+        end
+        hold on;
+        plot(raw_label, 'k-', 'LineWidth', 1.5);
+        t_title = ['Difference value of target id: ', num2str(target_id), ' At target axis: ', target_axis];
+        title(t_title);
+%        legend('raw signal', 'bak diff', 'bak threshold');
+        hold off;
     end
 
     function res = mergeCandidatePos(locs, threshold)

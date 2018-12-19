@@ -1,0 +1,25 @@
+function calculateMetrics(predict_pos, true_pos, threshold)
+    true_positive = 0;
+    false_positive = 0;
+    true_negative = 0;
+    false_negative = 0;
+    
+    p1 = 1;
+    p2 = 1;
+    while p1 <= length(predict_pos) || p2 <= length(true_pos)
+       up_threshold = true_pos(p2) - threshold;
+       down_threshold = true_pos(p2) + threshold;
+       if predict_pos(p1) < up_threshold
+           false_positive = false_positive + 1;
+           p1 = p1 + 1;
+       elseif predict_pos(p1) > down_threshold
+           false_negative = false_negative + 1;
+           p2 = p2 + 1;
+       elseif predict_pos(p1) >= up_threshold && predict_pos(p1) <= down_threshold
+          true_positive = true_positive + 1;
+          p1 = p1 + 1;
+          p2 = p2 + 1;
+       end
+    end
+
+end
