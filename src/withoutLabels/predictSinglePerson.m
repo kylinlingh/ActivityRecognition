@@ -13,9 +13,13 @@ function [raw_label, all_predicted_locs, merge_locs, real_pos] = predictSinglePe
     [~, canpos_z] = averageFilteringWithoutLabels3(raw_label, raw_axis_z, min_length, target_id, 'z', pre_threshold, bak_threshold, check_win);
     real_pos = findRealMutationPosition(raw_label);
     
-    mergeThreshold = 200;
+    %mergeThreshold = 200;
+    mergeThreshold = 1000;
     all_predicted_locs = [canpos_x; canpos_y; canpos_z];
+    
+   % all_predicted_locs = mergeCandidatePosWithMeanValue(sort(all_predicted_locs), mergeThreshold);
     all_predicted_locs = mergeCandidatePos(sort(all_predicted_locs), mergeThreshold);
+    
     all_predicted_locs = all_predicted_locs(all_predicted_locs >= min_length);
     all_predicted_locs = all_predicted_locs(all_predicted_locs < length(raw_label) - min_length);
     predict_diff = differenceBetweenPrediction(all_predicted_locs);
@@ -45,6 +49,32 @@ function [raw_label, all_predicted_locs, merge_locs, real_pos] = predictSinglePe
             end
         end
         real_mutation_pos = t_array(1:k-1);
+    end
+
+    function res = mergeCandidatePosWithMeanValue(locs, threshold)
+        res = zeros(length(locs), 1);
+        pre_data = locs(1);
+        k = 1;
+        i = 2;
+        while i <= length(locs) + 1
+            cur_sum = [pre_data];
+            while i <= length(locs) && locs(i) <= pre_data + threshold
+                pre_data = locs(i);
+                cur_sum = [cur_sum, pre_data];
+                i = i + 1;
+            end
+            if i <= length(locs)
+                pre_data = locs(i);
+                res(k) = ceil(mean(cur_sum));
+                k = k + 1; 
+                i = i + 1;
+            else
+                res(k) = ceil(mean(cur_sum));
+                i = i + 1;
+            end
+
+        end
+        res = res(1:k);
     end
 
     function res = mergeCandidatePos(locs, threshold)

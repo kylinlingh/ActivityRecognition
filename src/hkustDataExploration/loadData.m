@@ -1,22 +1,31 @@
 pathRoot = 'E:\matlab_workspace\dataset\HKUSTleft\';
 handSide = 'left';
-loadDataFromDir(pathRoot, handSide);
+mapForIdAndName = loadDataFromDir(pathRoot, handSide);
 
+%% Right handside
 pathRoot = 'E:\matlab_workspace\dataset\HKUSTright\';
 handSide = 'right';
-loadDataFromDir(pathRoot, handSide);
+mapForIdAndName = loadDataFromDir(pathRoot, handSide);
+%%
 
-function loadDataFromDir(pathRoot, handSide)
+function mapForIdAndName = loadDataFromDir(pathRoot, handSide)
     list = dir(fullfile(pathRoot));
     fileNum = size(list, 1) - 2;
     mergeAll = [];
     lengthAll = 0;
-    for k = 3 : fileNum
+    mapForIdAndName = struct();
+    mapForNameAndId = struct();
+    for k = 3 : fileNum + 2
        filePath = strcat(pathRoot, list(k).name);
+       fprintf("%s\n", filePath);
        tmpTable = csvread(filePath, 1, 0);
        tmpId = ones([length(tmpTable), 1]) * (k - 2);
        tmpTable = [tmpTable tmpId]; % add user id to the matrix
-       fprintf("%s\n", filePath);
+       
+       ttmp = strsplit(list(k).name, '.');
+       targetName = ttmp{1,1};
+       mapForIdAndName.(strcat('id',num2str(k-2))) = targetName;
+       mapForNameAndId.(targetName) = strcat('id',num2str(k-2));
        mergeAll = [mergeAll;tmpTable];
        lengthAll = lengthAll + length(tmpTable);
     end
@@ -36,4 +45,6 @@ function loadDataFromDir(pathRoot, handSide)
     else
        save HKUST_ALL_HAND.mat cachedData; 
     end
+    save mapForIdAndName.mat mapForIdAndName;
+    save mapForNameAndId.mat mapForNameAndId;
 end

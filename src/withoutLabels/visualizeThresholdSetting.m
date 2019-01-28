@@ -62,3 +62,16 @@ function visualizePreBakThresholdSetting(cachedData, min_length, target_id)
         drawPredictedLabel(raw_label, merge_all, target_id, pre_threshold, bak_threshold);
     end
 end
+
+%% Draw ROC curve
+function drawROC(cachedData, min_length, target_id, pre_threshold, bak_threshold)
+    figure;
+    for i = 1:6
+       subplot(2,3,i);
+       check_win = i;
+       [~, all_predicted_locs, ~, real_locs] = predictSinglePerson(cachedData, min_length, target_id, pre_threshold, bak_threshold, check_win);
+       [tp, fp, fn] = calculateMetrics(all_predicted_locs, real_locs, frequency); 
+       
+       %drawPredictedLabel(raw_label, merge_all, target_id, pre_threshold, bak_threshold, check_win);
+    end
+end
