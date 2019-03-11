@@ -13,7 +13,7 @@ load(segmentResultPath);
 load(nameAndIdmapPath);
 
 %%
-testId = 12;
+testId = 17;
 [targetRawLabel, predictedLabel, reviseLabel, rreviseLabel, predictedPercision, revisionPercision, lengthRevisionPercision, targetName, mergeLocs] = ...
     reviseSingleOne(testId, mapForIdAndName, mapForNameAndId, mapForSegmentation, cachedData);
 %targetSegmentPos = mergeLocs(:,2);

@@ -57,12 +57,12 @@ hold off;
 half_win = 10;
 [pred_pos, real_pos] = mutationDetectionWithoutLabels(half_win, sec_filtered_axis_x, sec_filtered_axis_y, sec_filtered_axis_z, raw_label, target_id);
 
-%{
+
 %% Plot raw signal
 fs = 20;
 plotRawSignal(fs, raw_label, raw_axis_x, target_id, 'x');
 plotRawSignal(fs, raw_label, raw_axis_y, target_id, 'y');
 plotRawSignal(fs, raw_label, raw_axis_z, target_id, 'z');
-%}
+
 
 

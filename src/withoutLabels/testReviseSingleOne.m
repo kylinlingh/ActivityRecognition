@@ -1,15 +1,15 @@
-function [targetRawLabel, predictedLabel,reviseLabel, rreviseLabel, predictedPercision, revisionPercision,lengthRevisionPercision, targetName, merge_locs] = ...
+function [revisedMutationPos, rreviseLabel] = ...
 reviseSingleOne(testId, mapForIdAndName, mapForNameAndId, mapForSegmentation, cachedData)
 
 [targetName, targetId, predictedLabel, targetSegmentPos, targetRawLabel] = loadData(testId);
 
 %%
-voteWinLength = 1000;
+voteWinLength = 500;
 minLengthOfSameActivity = 2000;
 % 两次修复的效果会好很多
 reviseLabel = reviseLabelFunc(predictedLabel, voteWinLength);
 rreviseLabel = reviseLabelFunc(reviseLabel', voteWinLength);
-
+%rreviseLabel = reviseLabel;
 revisedMutationPos = findRealMutationPosition(rreviseLabel);
 lengthReviseLabel = minLengthRevision(rreviseLabel, minLengthOfSameActivity, revisedMutationPos);
 %%
@@ -24,12 +24,12 @@ merge_locs = mergeLocs(merge_locs, targetSegmentPos, 2);    % 信号处理算法找到的
 merge_locs = mergeLocs(merge_locs, realPos, 3);             % 数据的真实切换位置
 merge_locs = mergeLocs(merge_locs, revisedMutationPos, 4);  % 数据修正后的切换位置
 %% Compare result of revision and prediction accuracy
-[predictedPercision, revisionPercision] = calPercision(targetRawLabel, predictedLabel, rreviseLabel);
-[~, lengthRevisionPercision] = calPercision(targetRawLabel, predictedLabel, lengthReviseLabel);
+%[predictedPercision, revisionPercision] = calPercision(targetRawLabel, predictedLabel, rreviseLabel);
+%[~, lengthRevisionPercision] = calPercision(targetRawLabel, predictedLabel, lengthReviseLabel);
 
 
-drawRevisionResult(targetRawLabel,targetSegmentPos, predictedLabel, testId, reviseLabel, rreviseLabel, targetName, predictedPercision, revisionPercision);
-%drawRevisionResult(targetRawLabel,targetSegmentPos, predictedLabel, testId, reviseLabel, rreviseLabel, targetName, predictedPercision, lengthRevisionPercision);
+%drawRevisionResult(targetRawLabel,targetSegmentPos, predictedLabel, testId, reviseLabel, rreviseLabel, targetName, predictedPercision, revisionPercision);
+%      drawRevisionResult(targetRawLabel,targetSegmentPos, predictedLabel, testId, reviseLabel, rreviseLabel, targetName, predictedPercision, lengthRevisionPercision);
 
 %% Auxiliary function definition
 
@@ -70,7 +70,7 @@ drawRevisionResult(targetRawLabel,targetSegmentPos, predictedLabel, testId, revi
 
     function [targetName, targetId, predictedLabel, targetSegmentPos, targetRawLabel] = loadData(testId)
         targetName = getName(mapForIdAndName, testId);
-        predictionResPath = sprintf('%s%s%s','E:\matlab_workspace\dataset\predictionResleft_normalTest\predictionResult_', targetName, '.txt')
+        predictionResPath = sprintf('%s%s%s','E:\matlab_workspace\dataset\predictionResleft\predictionResult_', targetName, '.txt')
         %fprintf(predictionResPath);
         file = textscan(fopen(predictionResPath), '%d', 'Delimiter',',');
         predictedLabel = file{1,1};
@@ -90,7 +90,21 @@ drawRevisionResult(targetRawLabel,targetSegmentPos, predictedLabel, testId, revi
         %revisionPercision = 0;
     end
 
-    function reviseLabel = reviseLabelFunc(predictedLabel, voteWinLength)
+    function revisedLabel = reviseLabelFunc(predictedLabel, voteWinLength)
+        revisedLabel = predictedLabel;
+        douVotWinLen = 2*voteWinLength;
+        dataLen = length(predictedLabel);
+        revisedLabel(1:douVotWinLen) = getMaxCountLabel(predictedLabel(1:douVotWinLen));
+        revisedLabel(dataLen-douVotWinLen : dataLen) = getMaxCountLabel(dataLen-douVotWinLen : dataLen); 
+
+        for i = douVotWinLen + 1 : dataLen - douVotWinLen - 1
+            preIndex = i - voteWinLength;
+            bakIndex = i + voteWinLength;
+            revisedLabel(i) = getMaxCountLabel(predictedLabel(preIndex:bakIndex));
+        end
+    end
+
+    function reviseLabel = reviseLabelFunc2(predictedLabel, voteWinLength)
         validWinLength = voteWinLength;
         FREQUENCY = 50;
         lengOfData = length(predictedLabel);
@@ -120,10 +134,10 @@ drawRevisionResult(targetRawLabel,targetSegmentPos, predictedLabel, testId, revi
         res = table(idx);
     end
 
-    function [preBegIndex, preEndIndex, bakBegIndex, bakEndIndex] = locateIndex(index, lengOfData, voteWinLength, dataWinLength)
+    function [preBegIndex, preEndIndex, bakBegIndex, bakEndIndex] = locateIndex(index, lengOfData, voteWinLength, frequency)
         [preBegIndex, preEndIndex, preGap] = getPreWinIndex(index, voteWinLength);
         % 前后互相补齐，保证数据量达到voteWinLength
-        [bakBegIndex, bakEndIndex, bakGap] = getBakWinIndex(index, lengOfData, voteWinLength + preGap, dataWinLength);
+        [bakBegIndex, bakEndIndex, bakGap] = getBakWinIndex(index, lengOfData, voteWinLength + preGap, frequency);
         [preBegIndex, preEndIndex, preGap] = getPreWinIndex(index, voteWinLength+bakGap);
     end
 
@@ -140,12 +154,12 @@ drawRevisionResult(targetRawLabel,targetSegmentPos, predictedLabel, testId, revi
         preGap = voteWinLength - preWinCount;
     end
 
-    function [bakBegIndex, bakEndIndex, bakGap] = getBakWinIndex(index, lengOfData, voteWinLength, dataWinLength)
-        bakBegIndex = index + dataWinLength;
+    function [bakBegIndex, bakEndIndex, bakGap] = getBakWinIndex(index, lengOfData, voteWinLength, frequency)
+        bakBegIndex = index + frequency;
         if bakBegIndex > lengOfData
             bakBegIndex = lengOfData;
         end
-        bakEndIndex = index + dataWinLength + voteWinLength - 1;
+        bakEndIndex = index + frequency + voteWinLength - 1;
         if bakEndIndex > lengOfData
             bakEndIndex = lengOfData;
         end    
