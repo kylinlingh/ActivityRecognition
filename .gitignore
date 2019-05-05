@@ -1,2 +1,5 @@
-dataset
+dataset/cachedData
+dataset/HKUST2hands
+dataset/tempData
 *.asv
+*.zip

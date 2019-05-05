@@ -7,7 +7,9 @@ function [targetName, predictedLabel, targetSegmentPos, targetRawLabel] = ...
 % targetRawLabel：用户实际的动作标签
 
     targetName = getName(mapForIdAndName, testId);
-    predictionResPath = sprintf('%s%s%s','E:\matlab_workspace\dataset\predictionResleft\predictionResult_', targetName, '.txt')
+    %predictionResPath = sprintf('%s%s%s','E:\matlab_workspace\dataset\predictionResleft\predictionResult_', targetName, '.txt')
+    predictionResPath = sprintf('%s%s%s','E:\matlab_workspace\dataset\predictionResleft_SdA_Stat\predictionResult_', targetName, '.txt')
+
     %fprintf(predictionResPath);
     file = textscan(fopen(predictionResPath), '%d', 'Delimiter',',');
     
